@@ -1,0 +1,1 @@
+{"virtualbox":{"/home/vagrant/incremental-api":{"type":null,"mount_options":[],"guestpath":"/home/vagrant/incremental-api","hostpath":"/home/steve/Code/laracasts/incremental-api","disabled":false,"__vagrantfile":true},"/vagrant":{"guestpath":"/vagrant","hostpath":"/home/steve/Code/laracasts/incremental-api","disabled":false,"__vagrantfile":true}}}
