@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Lesson;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
+use Illuminate\Support\Facades\Response;
 
 class LessonsController extends Controller
 {
@@ -20,7 +22,11 @@ class LessonsController extends Controller
         // 3. Showing database schema.
         // 4. Linking the database structure to the API output
         // 5. No control over response code and headers
-        return Lesson::all();
+        $lessons = Lesson::all();
+
+        return Response::json([
+            'data' => $lessons->toArray()
+        ], 200);
     }
 
     /**
@@ -36,7 +42,8 @@ class LessonsController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
+     *
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -47,18 +54,30 @@ class LessonsController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
+     *
      * @return \Illuminate\Http\Response
      */
     public function show($id)
     {
-        //
+        $lesson = Lesson::find($id);
+
+        if (!$lesson) {
+            return Response::json([
+                'error' => ['message' => 'Lessons does not exist']
+            ], 404);
+        }
+
+        return Response::json([
+            'data' => $lesson->toArray()
+        ], 200);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
+     *
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -69,8 +88,9 @@ class LessonsController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \Illuminate\Http\Request $request
+     * @param  int $id
+     *
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -81,7 +101,8 @@ class LessonsController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int $id
+     *
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
