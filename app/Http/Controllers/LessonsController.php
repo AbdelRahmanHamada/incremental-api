@@ -2,14 +2,34 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ApiRequest;
+use App\Http\Requests\StoreLesson;
 use App\Lesson;
+use App\Transformers\LessonTransformer;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use Illuminate\Support\Facades\Response;
 
-class LessonsController extends Controller
+class LessonsController extends ApiController
 {
+
+    /**
+     * @var LessonTransformer
+     */
+    private $lesson_transformer;
+
+    /**
+     * LessonsController constructor.
+     *
+     * @param LessonTransformer $lesson_transformer
+     */
+    public function __construct(LessonTransformer $lesson_transformer)
+    {
+        $this->lesson_transformer = $lesson_transformer;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -24,9 +44,9 @@ class LessonsController extends Controller
         // 5. No control over response code and headers
         $lessons = Lesson::all();
 
-        return Response::json([
-            'data' => $lessons->toArray()
-        ], 200);
+        return $this->respond([
+            'data' => $this->lesson_transformer->transformCollection($lessons->toArray())
+        ]);
     }
 
     /**
@@ -42,13 +62,15 @@ class LessonsController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param StoreLesson|Request $request
      *
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreLesson $request)
     {
-        //
+        Lesson::create($request->input());
+
+        return $this->respondCreated('Lesson was created');
     }
 
     /**
@@ -63,14 +85,12 @@ class LessonsController extends Controller
         $lesson = Lesson::find($id);
 
         if (!$lesson) {
-            return Response::json([
-                'error' => ['message' => 'Lessons does not exist']
-            ], 404);
+            return $this->respondNotFound('Lesson does not exist');
         }
 
-        return Response::json([
-            'data' => $lesson->toArray()
-        ], 200);
+        return $this->respond([
+            'data' => $this->lesson_transformer->transform($lesson->toArray())
+        ]);
     }
 
     /**

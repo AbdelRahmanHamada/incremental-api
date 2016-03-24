@@ -12,4 +12,14 @@ class Lesson extends Model
      * @var array
      */
     protected $fillable = ['title', 'body'];
+
+    /**
+     * The lesson belongs to many tags.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function tags()
+    {
+        return $this->belongsToMany('App\Tag');
+    }
 }
