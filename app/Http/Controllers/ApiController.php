@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Http\Response as HttpResponse;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ApiController extends Controller
 {
@@ -16,7 +16,7 @@ class ApiController extends Controller
     /**
      * @return mixed
      */
-    public function getStatusCode()
+    protected function getStatusCode()
     {
         return $this->status_code;
     }
@@ -26,7 +26,7 @@ class ApiController extends Controller
      *
      * @return $this
      */
-    public function setStatusCode($status_code)
+    protected function setStatusCode($status_code)
     {
         $this->status_code = $status_code;
 
@@ -39,9 +39,34 @@ class ApiController extends Controller
      *
      * @return mixed
      */
-    public function respond($data, $header = [])
+    protected function respond($data, $header = [])
     {
         return Response::json($data, $this->getStatusCode(), $header);
+    }
+
+    /**
+     * Respond with pagination
+     *
+     * @param LengthAwarePaginator $items
+     * @param array $data
+     *
+     * @return mixed
+     */
+    protected function respondWithPagination(LengthAwarePaginator $items, array $data)
+    {
+        $pagination = [
+            'total' => $items->total(),
+            'per_page' => $items->perPage(),
+            'next_page_url' => $items->nextPageUrl(),
+            'prev_page_url' => $items->previousPageUrl(),
+            'current_page' => $items->currentPage(),
+            'from' => $items->firstItem(),
+            'to' => $items->lastItem(),
+        ];
+
+        $data = array_merge($pagination, $data);
+
+        return $this->respond($data);
     }
 
     /**
@@ -49,7 +74,7 @@ class ApiController extends Controller
      *
      * @return mixed
      */
-    public function responseWithError($message)
+    protected function responseWithError($message)
     {
         return $this->respond([
             'error' => [
@@ -66,10 +91,9 @@ class ApiController extends Controller
      *
      * @return mixed
      */
-    public function respondNotFound($message = 'Not found!')
+    protected function respondNotFound($message = 'Not found!')
     {
         return $this->setStatusCode(HttpResponse::HTTP_NOT_FOUND)->responseWithError($message);
-
     }
 
     /**
@@ -79,7 +103,7 @@ class ApiController extends Controller
      *
      * @return mixed
      */
-    public function respondInternalError($message = 'Internal server error!')
+    protected function respondInternalError($message = 'Internal server error!')
     {
         return $this->setStatusCode(HttpResponse::HTTP_INTERNAL_SERVER_ERROR)->responseWithError($message);
     }
@@ -91,7 +115,7 @@ class ApiController extends Controller
      *
      * @return mixed
      */
-    public function respondCreated($message)
+    protected function respondCreated($message)
     {
         return $this->setStatusCode(HttpResponse::HTTP_CREATED)->respond([
             'message' => $message

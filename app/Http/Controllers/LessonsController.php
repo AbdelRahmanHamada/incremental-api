@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Lesson;
+use App\Http\Requests;
+
+use Illuminate\Http\Request;
 use App\Http\Requests\ApiRequest;
 use App\Http\Requests\StoreLesson;
-use App\Lesson;
+use Illuminate\Support\Facades\Input;
 use App\Transformers\LessonTransformer;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Http\Request;
 
-use App\Http\Requests;
-use Illuminate\Support\Facades\Response;
 
 class LessonsController extends ApiController
 {
@@ -37,16 +37,14 @@ class LessonsController extends ApiController
      */
     public function index()
     {
-        // 1. All is bad.
-        // 2. No way to attach meta data.
-        // 3. Showing database schema.
-        // 4. Linking the database structure to the API output
-        // 5. No control over response code and headers
-        $lessons = Lesson::all();
+        $limit = Input::get('limit', 3);
 
-        return $this->respond([
-            'data' => $this->lesson_transformer->transformCollection($lessons->toArray())
-        ]);
+        $lessons = Lesson::paginate($limit);
+
+        return $this->respondWithPagination(
+            $lessons,
+            ['data' => $this->lesson_transformer->transformCollection($lessons->toArray()['data'])]
+        );
     }
 
     /**
